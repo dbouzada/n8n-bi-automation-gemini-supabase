@@ -1,0 +1,398 @@
+{
+  "name": "Admin via Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        3776,
+        608
+      ],
+      "id": "2761ef56-8a2c-4323-a397-7ac0f192c9ad",
+      "name": "When chat message received",
+      "webhookId": "d-admin-chat-trigger-001"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Sos el administrador de base de datos del sistema de ventas. Podés realizar las siguientes acciones:\n\n### ACCIONES DISPONIBLES:\n1. **Agregar producto**: campos requeridos: nombre, categoría (Hardware/Periféricos/Accesorios/Mobiliario), precio_base.\n2. **Actualizar producto**: usá la herramienta 'actualizar_producto'. Pasale id (obligatorio) y solo los campos que cambian.\n3. **Eliminar producto**: confirmá con el usuario antes de ejecutar.\n4. **Agregar vendedor**: campos requeridos: nombre, región (Litoral/Centro/Norte/Sur/Este/Oeste).\n5. **Eliminar vendedor**: confirmá antes de ejecutar.\n6. **Ver productos**: listar catálogo completo.\n7. **Ver vendedores**: listar vendedores.\n8. **Ver resumen ventas**: cantidad y totales.\n\n### REGLAS:\n- Antes de eliminar o modificar, mostrá los datos actuales y pedí confirmación.\n- Si faltan campos requeridos, preguntá antes de ejecutar.\n- Después de cada operación exitosa, confirmá qué se hizo.\n- Para análisis o reportes, indicá que use el Chatbot Ejecutivo.\n\n### FORMATO: usá emojis ✅ ❌ ⚠️ 📋 🔍 para mayor claridad."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4096,
+        608
+      ],
+      "id": "b7f0c97a-c834-4de2-8440-0d5ae6a723b9",
+      "name": "Admin AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3936,
+        848
+      ],
+      "id": "82fc2fd8-d8a7-4f2e-b42f-c67d7111368a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QotC9CxBk2uWUJib",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        4096,
+        848
+      ],
+      "id": "f75d1eff-4bc1-416f-a24d-d692c3b834db",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para listar todos los productos con ID, nombre, categoría y precio.",
+        "operation": "getAll",
+        "tableId": "productos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4336,
+        1008
+      ],
+      "id": "755455f3-89f1-46cd-93dd-7108c2355bd0",
+      "name": "ver_productos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para listar todos los vendedores con ID, nombre y región.",
+        "operation": "getAll",
+        "tableId": "vendedores",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        1008
+      ],
+      "id": "97d0498c-3689-41c5-920d-067286bef469",
+      "name": "ver_vendedores",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para agregar un producto nuevo. Requiere nombre, categoria y precio_base. Solo llamala cuando tengas los 3 campos confirmados.",
+        "tableId": "productos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ $fromAI('nombre', 'Nombre del producto') }}"
+            },
+            {
+              "fieldId": "categoria",
+              "fieldValue": "={{ $fromAI('categoria', 'Categoría: Hardware, Periféricos, Accesorios o Mobiliario') }}"
+            },
+            {
+              "fieldId": "precio_base",
+              "fieldValue": "={{ $fromAI('precio_base', 'Precio base numérico') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4656,
+        1008
+      ],
+      "id": "69d3a865-4f78-4e20-bd6f-ac5e895c2efe",
+      "name": "agregar_producto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "actualizar_producto",
+        "description": "Actualiza parcialmente un producto en Supabase. Parámetros en JSON: id (número, obligatorio), nombre (string, opcional), categoria (string, opcional), precio_base (número, opcional). Solo incluí los campos que el usuario quiere cambiar.",
+        "jsCode": "const SUPABASE_URL = 'https://kuxmfmxoydaisvubsnaz.supabase.co';\nconst SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM';\n\nlet params;\ntry {\n  params = JSON.parse(query);\n} catch(e) {\n  return JSON.stringify({ error: 'El input debe ser un JSON válido. Ejemplo: {\"id\":3,\"precio_base\":380}' });\n}\n\nconst { id, nombre, categoria, precio_base } = params;\n\nif (!id) {\n  return JSON.stringify({ error: 'El campo id es obligatorio.' });\n}\n\nconst fields = {};\nif (nombre      !== undefined && nombre      !== '') fields.nombre      = nombre;\nif (categoria   !== undefined && categoria   !== '') fields.categoria   = categoria;\nif (precio_base !== undefined && precio_base !== 0)  fields.precio_base = precio_base;\n\nif (Object.keys(fields).length === 0) {\n  return JSON.stringify({ error: 'No se especificó ningún campo para actualizar.' });\n}\n\nconst res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`, {\n  method: 'PATCH',\n  headers: {\n    'apikey': SUPABASE_KEY,\n    'Authorization': `Bearer ${SUPABASE_KEY}`,\n    'Content-Type': 'application/json',\n    'Prefer': 'return=representation'\n  },\n  body: JSON.stringify(fields)\n});\n\nconst data = await res.json();\n\nif (!res.ok) {\n  return JSON.stringify({ error: 'Error en Supabase', detalle: data });\n}\n\nif (!data || data.length === 0) {\n  return JSON.stringify({ error: `No se encontró ningún producto con id=${id}` });\n}\n\nreturn JSON.stringify({ success: true, producto_actualizado: data[0] });"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        4816,
+        1008
+      ],
+      "id": "5bbe110e-06cb-4f7c-801c-596995475606",
+      "name": "actualizar_producto"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para eliminar un producto por su ID numérico. Solo llamala después de confirmar con el usuario.",
+        "operation": "delete",
+        "tableId": "productos"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4976,
+        1008
+      ],
+      "id": "c79e8566-cc96-44a0-9afb-323b59929dd0",
+      "name": "eliminar_producto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para agregar un vendedor nuevo. Requiere nombre y region. Solo llamala cuando tengas ambos campos confirmados.",
+        "tableId": "vendedores",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ $fromAI('nombre', 'Nombre completo del vendedor') }}"
+            },
+            {
+              "fieldId": "region",
+              "fieldValue": "={{ $fromAI('region', 'Región: Litoral, Centro, Norte, Sur, Este u Oeste') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5136,
+        1008
+      ],
+      "id": "3d39264c-5a6c-4e7e-8d1b-cfe99dd6f791",
+      "name": "agregar_vendedor",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para eliminar un vendedor por su ID numérico. Solo llamala después de confirmar con el usuario.",
+        "operation": "delete",
+        "tableId": "vendedores"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5296,
+        1008
+      ],
+      "id": "afefc52e-a515-4b74-b837-96181ce304a6",
+      "name": "eliminar_vendedor",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usala para obtener un resumen de ventas: cantidad de registros y monto total facturado.",
+        "operation": "getAll",
+        "tableId": "ventas",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5456,
+        1008
+      ],
+      "id": "f269c5e4-94bc-4d5f-94ef-90266597b259",
+      "name": "ver_resumen_ventas",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ver_productos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ver_vendedores": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agregar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualizar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "eliminar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agregar_vendedor": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "eliminar_vendedor": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ver_resumen_ventas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Admin AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "de7a7d88-b622-4f4c-a5f6-7f8cea9001cc",
+  "meta": {
+    "instanceId": "051e5aaf6f9bdc7e896bff2bf0f4573c0f7b256ac306da081cd7285baaf9012f"
+  },
+  "id": "5TQCSiLYQnvFUsWU",
+  "tags": []
+}

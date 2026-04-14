@@ -1,0 +1,401 @@
+{
+  "name": "Generador de Datos Sintéticos",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        -304
+      ],
+      "id": "13be528f-68c3-44a7-b4b8-2ed2ad8ce7ca",
+      "name": "Schedule Trigger (Cada hora)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -144
+      ],
+      "id": "b7a3d7da-af29-481a-83b8-005bcbfd4dd9",
+      "name": "Ejecución Manual"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Genera entre 5 y 15 ventas sintéticas por ejecución\nconst cantidadVentas = Math.floor(Math.random() * 11) + 5;\n\nconst vendedorIds = [1, 2, 3, 4, 5, 6, 7];\nconst productos = [\n  { id: 1,  precio: 1250.00 },\n  { id: 2,  precio: 950.00  },\n  { id: 3,  precio: 350.00  },\n  { id: 4,  precio: 580.00  },\n  { id: 5,  precio: 95.00   },\n  { id: 6,  precio: 65.00   },\n  { id: 7,  precio: 120.00  },\n  { id: 8,  precio: 75.00   },\n  { id: 9,  precio: 250.00  },\n  { id: 10, precio: 450.00  },\n  { id: 11, precio: 180.00  }\n];\n\n// Genera fecha aleatoria en los últimos 90 días\nfunction randomDate() {\n  const now = new Date();\n  const daysAgo = Math.floor(Math.random() * 90);\n  const hoursAgo = Math.floor(Math.random() * 24);\n  const minutesAgo = Math.floor(Math.random() * 60);\n  now.setDate(now.getDate() - daysAgo);\n  now.setHours(now.getHours() - hoursAgo);\n  now.setMinutes(now.getMinutes() - minutesAgo);\n  return now.toISOString();\n}\n\nconst ventas = [];\n\nfor (let i = 0; i < cantidadVentas; i++) {\n  const producto = productos[Math.floor(Math.random() * productos.length)];\n  const vendedor_id = vendedorIds[Math.floor(Math.random() * vendedorIds.length)];\n  const cantidad = Math.floor(Math.random() * 5) + 1;\n  const monto_total = parseFloat((producto.precio * cantidad).toFixed(2));\n\n  ventas.push({\n    json: {\n      fecha: randomDate(),\n      vendedor_id,\n      producto_id: producto.id,\n      cantidad,\n      monto_total\n    }\n  });\n}\n\nreturn ventas;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        -224
+      ],
+      "id": "8bbf2781-7324-41ba-b820-b69a7fd4c40f",
+      "name": "Generar Ventas Sintéticas"
+    },
+    {
+      "parameters": {
+        "tableId": "ventas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "fecha",
+              "fieldValue": "={{ $json.fecha }}"
+            },
+            {
+              "fieldId": "vendedor_id",
+              "fieldValue": "={{ $json.vendedor_id }}"
+            },
+            {
+              "fieldId": "producto_id",
+              "fieldValue": "={{ $json.producto_id }}"
+            },
+            {
+              "fieldId": "cantidad",
+              "fieldValue": "={{ $json.cantidad }}"
+            },
+            {
+              "fieldId": "monto_total",
+              "fieldValue": "={{ $json.monto_total }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        -224
+      ],
+      "id": "68a9f9e3-e888-454d-a7d4-1a1e365db720",
+      "name": "Insertar Ventas en Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide aleatoriamente si agregar un producto nuevo (20% de probabilidad)\nconst agregar = Math.random() < 0.2;\n\nif (!agregar) {\n  return [{ json: { agregar: false } }];\n}\n\nconst categorias = ['Hardware', 'Periféricos', 'Accesorios', 'Mobiliario'];\nconst nombresPorCategoria = {\n  Hardware:     ['Notebook Gamer', 'PC All-in-One', 'Servidor NAS', 'Mini PC', 'Tablet Pro'],\n  Periféricos:  ['Headset Gamer', 'Micrófono USB', 'Cámara Web 4K', 'Control RGB', 'Pad XL'],\n  Accesorios:   ['Mochila Laptop', 'Cable HDMI 2.1', 'Adaptador USB-C', 'Base Notebook', 'Limpiador LCD'],\n  Mobiliario:   ['Silla Ergonómica', 'Mesa Gamer', 'Soporte Monitor', 'Reposa Pies', 'Organizador Cables']\n};\n\nconst categoria = categorias[Math.floor(Math.random() * categorias.length)];\nconst nombres = nombresPorCategoria[categoria];\nconst nombre = nombres[Math.floor(Math.random() * nombres.length)];\n\n// Precio según categoría\nconst precioRanges = {\n  Hardware:    [500, 2000],\n  Periféricos: [50, 300],\n  Accesorios:  [15, 150],\n  Mobiliario:  [100, 800]\n};\n\nconst [min, max] = precioRanges[categoria];\nconst precio_base = parseFloat((Math.random() * (max - min) + min).toFixed(2));\n\nreturn [{ json: { agregar: true, nombre, categoria, precio_base } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -224
+      ],
+      "id": "43e40dbb-aec1-4dcd-aedd-248bd29571dd",
+      "name": "¿Agregar Producto Nuevo?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "condicion-agregar-producto",
+              "leftValue": "={{ $json.agregar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        -224
+      ],
+      "id": "f117f831-c1aa-4973-8570-f57d45953e89",
+      "name": "IF Agregar Producto"
+    },
+    {
+      "parameters": {
+        "tableId": "productos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ $json.nombre }}"
+            },
+            {
+              "fieldId": "categoria",
+              "fieldValue": "={{ $json.categoria }}"
+            },
+            {
+              "fieldId": "precio_base",
+              "fieldValue": "={{ $json.precio_base }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        -304
+      ],
+      "id": "cc5455a3-b3d9-4c62-bd73-a873ae4fcee3",
+      "name": "Insertar Producto Nuevo",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "productos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        -304
+      ],
+      "id": "626f8dd4-0410-4b82-92ba-a0d61d3eb7b4",
+      "name": "Get Productos Actualizados",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "productos_embeddings",
+          "mode": "list",
+          "cachedResultName": "productos_embeddings"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        2736,
+        -304
+      ],
+      "id": "2dc4f628-8c28-4bfe-a81f-a1553da2df69",
+      "name": "Re-vectorizar Productos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Dr1NzBFegdatrpXL",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "nombre",
+                "value": "={{ $json.nombre }}"
+              },
+              {
+                "name": "categoria",
+                "value": "={{ $json.categoria }}"
+              },
+              {
+                "name": "precio",
+                "value": "={{ $json.precio_base }}"
+              },
+              {
+                "name": "description",
+                "value": "={{ $json.nombre }} - {{ $json.categoria }} - Precio: ${{ $json.precio_base }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2848,
+        -128
+      ],
+      "id": "9c8f6799-d46d-4482-9f22-9b7c0c077ef8",
+      "name": "Data Loader Productos"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        -128
+      ],
+      "id": "6cdb7b07-812d-4b71-b8ba-00fce81ddc57",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QotC9CxBk2uWUJib",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger (Cada hora)": {
+      "main": [
+        [
+          {
+            "node": "Generar Ventas Sintéticas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecución Manual": {
+      "main": [
+        [
+          {
+            "node": "Generar Ventas Sintéticas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Ventas Sintéticas": {
+      "main": [
+        [
+          {
+            "node": "Insertar Ventas en Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar Ventas en Supabase": {
+      "main": [
+        [
+          {
+            "node": "¿Agregar Producto Nuevo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Agregar Producto Nuevo?": {
+      "main": [
+        [
+          {
+            "node": "IF Agregar Producto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Agregar Producto": {
+      "main": [
+        [
+          {
+            "node": "Insertar Producto Nuevo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar Producto Nuevo": {
+      "main": [
+        [
+          {
+            "node": "Get Productos Actualizados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Productos Actualizados": {
+      "main": [
+        [
+          {
+            "node": "Re-vectorizar Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Loader Productos": {
+      "ai_document": [
+        [
+          {
+            "node": "Re-vectorizar Productos",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Re-vectorizar Productos",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e9a30c5e-840d-4704-a13a-a4107120b233",
+  "meta": {
+    "instanceId": "051e5aaf6f9bdc7e896bff2bf0f4573c0f7b256ac306da081cd7285baaf9012f"
+  },
+  "id": "Rfx02WQtO77qy9DV",
+  "tags": []
+}

@@ -1,0 +1,337 @@
+{
+  "name": "Reporte Ejecutivo a Demanda",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        5392,
+        1280
+      ],
+      "id": "021195ec-7d66-4f89-939c-bae047023488",
+      "name": "Generar Reporte Ahora"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        5392,
+        1440
+      ],
+      "id": "939f37cf-e727-4786-b1e5-bd834ab674b7",
+      "name": "Schedule Lunes 8AM"
+    },
+    {
+      "parameters": {
+        "url": "https://kuxmfmxoydaisvubsnaz.supabase.co/rest/v1/ventas?select=*&order=fecha.desc&limit=500",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5712,
+        1200
+      ],
+      "id": "3abd0e13-fdb7-49f6-aadd-6d777585a05b",
+      "name": "GET Ventas"
+    },
+    {
+      "parameters": {
+        "url": "https://kuxmfmxoydaisvubsnaz.supabase.co/rest/v1/vendedores?select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5712,
+        1360
+      ],
+      "id": "aa07228e-c60d-4f52-b6d5-bb4d33e33123",
+      "name": "GET Vendedores"
+    },
+    {
+      "parameters": {
+        "url": "https://kuxmfmxoydaisvubsnaz.supabase.co/rest/v1/productos?select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1eG1mbXhveWRhaXN2dWJzbmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU2NDYsImV4cCI6MjA4OTM2MTY0Nn0.QvuOfaEvVwXh4tCt4y2s6DZMOldFZWkMIXotQhofvQM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5712,
+        1520
+      ],
+      "id": "2e992b9a-c3b9-40dc-acff-4f497cf60157",
+      "name": "GET Productos"
+    },
+    {
+      "parameters": {
+        "mode": "combineAll"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        6032,
+        1360
+      ],
+      "id": "8d8d323b-eb0f-4be4-a7ac-d4306630942e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet resumen = {\n    total_ventas: 0,\n    monto_total: 0,\n    total_productos: 0,\n    total_vendedores: 0,\n    monto_promedio: 0\n};\n\nlet ventas_por_mes = {};\nlet ventas_por_vendedor = {};\nlet ventas_por_producto = {}; // <--- Agregamos esto\n\nfor (const item of items) {\n    const d = item.json;\n    \n    if (d.monto_total !== undefined) { \n        const monto = parseFloat(d.monto_total || 0);\n        resumen.total_ventas++;\n        resumen.monto_total += monto;\n\n        // Agrupación por Mes\n        if (d.fecha) {\n            const mes = d.fecha.substring(0, 7); \n            ventas_por_mes[mes] = (ventas_por_mes[mes] || 0) + monto;\n        }\n\n        // Agrupación por Vendedor (usamos 'nombre' del vendedor)\n        if (d.nombre && d.vendedor_id) {\n            ventas_por_vendedor[d.nombre] = (ventas_por_vendedor[d.nombre] || 0) + monto;\n        }\n\n        // Agrupación por Producto (basado en 'producto_id' o 'nombre_producto')\n        // Si en el JSON ves una columna de nombre de producto, usala acá:\n        const prod = d.nombre_producto || `Producto ${d.producto_id}`; \n        if (d.producto_id) {\n            ventas_por_producto[prod] = (ventas_por_producto[prod] || 0) + monto;\n        }\n    }\n}\n\n// Formateo final\nresumen.monto_promedio = (resumen.total_ventas > 0 ? (resumen.monto_total / resumen.total_ventas).toFixed(2) : 0);\nresumen.monto_total = resumen.monto_total.toFixed(2);\n\nreturn {\n    resumen,\n    ventas_por_mes,\n    ventas_por_vendedor,\n    ventas_por_producto, // <--- Ahora lo devolvemos\n    fecha_reporte: new Date().toLocaleDateString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6304,
+        1360
+      ],
+      "id": "66f93db5-246a-41cf-a38c-6361a51832e2",
+      "name": "Consolidar Datos"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generá un reporte ejecutivo de ventas profesional EN FORMATO HTML basado en estos datos:\n\n\n\n{{ JSON.stringify($json, null, 2) }}\n\n\n\n### REGLAS PARA GRÁFICOS:\n\nPara cada sección, incluí una etiqueta <img> cuya fuente sea QuickChart. \n\nIMPORTANTE: \n\n- Usá comillas simples (') para los atributos de HTML y comillas dobles (\") para el JSON interno de la URL.\n\n- NO uses espacios en las URLs.\n\n- Si hay más de 5 vendedores o productos, usá solo el Top 5.\n\n\n\n### Estructura del HTML requerida:\n\n\n\n<div style=\"font-family: Arial, sans-serif; color: #333; line-height: 1.6;\">\n\n  <h2 style=\"color: #2c3e50;\">📊 REPORTE EJECUTIVO DE VENTAS</h2>\n\n  <p><strong>Fecha:</strong> {{ $json.fecha_reporte }}</p>\n\n  <hr>\n\n\n\n  <h3>1. KPIs PRINCIPALES</h3>\n\n  <p>(Resumen de ventas y montos)</p>\n\n\n  <h3>2. TOP VENDEDORES 🏆</h3>\n\n  <p>(Breve análisis)</p>\n\n  <div style=\"text-align: center;\">\n\n    <img src=\"https://quickchart.io/chart?c={%22type%22:%22doughnut%22,%22data%22:{%22labels%22:[L1,L2],%22datasets%22:[{%22data%22:[V1,V2]}]}}\" width=\"400\">\n\n  </div>\n\n\n\n  <h3>3. PRODUCTOS LÍDERES 🛍️</h3>\n\n  <p>(Análisis de productos)</p>\n\n  <div style=\"text-align: center;\">\n\n    <img src=\"https://quickchart.io/chart?c={%22type%22:%22horizontalBar%22,%22data%22:{%22labels%22:[P1,P2],%22datasets%22:[{%22label%22:%22Ventas%22,%22data%22:[V1,V2],%22backgroundColor%22:%22#36a2eb%22}]}}\" width=\"400\">\n\n  </div>\n\n\n\n  <h3>4. TENDENCIA DE VENTAS 📈</h3>\n\n  <p>(Evolución mensual)</p>\n\n  <div style=\"text-align: center;\">\n\n    <img src=\"https://quickchart.io/chart?c={%22type%22:%22line%22,%22data%22:{%22labels%22:[M1,M2],%22datasets%22:[{%22label%22:%22Monto%22,%22data%22:[V1,V2],%22fill\":false,%22borderColor%22:%22#ff6384%22}]}}\" width=\"400\">\n\n  </div>\n\n\n\n  <h3>5. CONCLUSIÓN ESTRATÉGICA 🚀</h3>\n\n  <ul>\n\n    <li>Punto 1</li>\n\n    <li>Punto 2</li>\n\n    <li>Punto 3</li>\n\n  </ul>\n\n</div>\n\n\n\n**REGLA DE SALIDA:** Devolvé el código HTML directamente. NO uses bloques de código (```).\n\n\n\n2. TOP VENDEDORES: Gráfico de tipo pie.\n\n\n\nREGLA ESTRICTA: Incluí SOLO a los 3 mejores vendedores para que la URL sea corta y no se rompa.\n\n\n\nFORMATO: https://quickchart.io/chart?c={\"type\":\"pie\",\"data\":{\"labels\":[\"Nombre1\",\"Nombre2\",\"Nombre3\"],\"datasets\":[{\"data\":[Monto1,Monto2,Monto3]}]}}\n\n\n\nNo agregues leyendas largas ni estilos extra."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        6592,
+        1360
+      ],
+      "id": "41f685f8-e16b-4bef-b361-c2847ad8701e",
+      "name": "Generar Reporte con IA"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        6592,
+        1536
+      ],
+      "id": "e6aee484-f686-473f-acf7-c0e5193094cf",
+      "name": "Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QotC9CxBk2uWUJib",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "dbouzada@gmail.com",
+        "subject": "=📊 Reporte Ejecutivo de Ventas - {{ $('Consolidar Datos').item.json.fecha_reporte }}",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6896,
+        1360
+      ],
+      "id": "1c26382f-9de7-40e8-95ee-9759d109db04",
+      "name": "Enviar Reporte por Email",
+      "webhookId": "863d5d5a-8d16-4701-94f9-9bacd012eb66",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oSW0QGJbhlfURTkr",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generar Reporte Ahora": {
+      "main": [
+        [
+          {
+            "node": "GET Ventas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET Vendedores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Lunes 8AM": {
+      "main": [
+        [
+          {
+            "node": "GET Ventas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET Vendedores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Ventas": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Vendedores": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Datos": {
+      "main": [
+        [
+          {
+            "node": "Generar Reporte con IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Reporte con IA": {
+      "main": [
+        [
+          {
+            "node": "Enviar Reporte por Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generar Reporte con IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Productos": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "153781e5-5b51-43ce-b227-390439f6aba1",
+  "meta": {
+    "instanceId": "051e5aaf6f9bdc7e896bff2bf0f4573c0f7b256ac306da081cd7285baaf9012f"
+  },
+  "id": "WSuEJOwLP8fsdnBi",
+  "tags": []
+}
